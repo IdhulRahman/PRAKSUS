@@ -53,6 +53,10 @@ def check_and_remove_duplicates(df):
         return df_no_duplicates, duplicates
     return df, pd.DataFrame()  # Jika tidak ada duplikasi, kembalikan DataFrame asli
 
+# Fungsi untuk mengonversi DataFrame ke CSV dalam memori
+def convert_df_to_csv(df):
+    return df.to_csv(index=False, header=False)
+
 # Membuat UI menggunakan Streamlit
 st.set_page_config(page_title="Ekstraktor Tabel PDF", layout="wide")
 st.title('🦉 Ekstraktor Tabel PDF, Pembersih, dan Pengecek Duplikasi ⚔️')
@@ -84,9 +88,7 @@ if pdf_file is not None:
         cleaned_data = clean_csv(extracted_csv_path)
 
     # Menyimpan data yang sudah dibersihkan ke CSV
-    cleaned_csv_path = os.path.join(temp_dir, "cleaned_data.csv")
     df_cleaned = pd.DataFrame(cleaned_data)
-    df_cleaned.to_csv(cleaned_csv_path, index=False, header=False)
 
     st.success("Data berhasil diekstrak dan dibersihkan! 🦉⚔️")
 
@@ -111,12 +113,14 @@ if pdf_file is not None:
         
         with tab3:
             st.subheader("Opsi Unduhan 📂")
-            # Menyimpan data tanpa duplikasi ke CSV
-            no_duplicates_csv_path = os.path.join(temp_dir, "no_duplicates_data.csv")
-            df_no_duplicates.to_csv(no_duplicates_csv_path, index=False, header=False)
             
-            st.download_button("Unduh CSV Data Bersih", cleaned_csv_path, file_name="cleaned_data.csv")
-            st.download_button("Unduh CSV Tanpa Duplikasi", no_duplicates_csv_path, file_name="no_duplicates_data.csv")
+            # Menggunakan io.StringIO untuk data yang sudah diproses
+            cleaned_csv = convert_df_to_csv(df_cleaned)
+            no_duplicates_csv = convert_df_to_csv(df_no_duplicates)
+
+            # Tombol unduhan
+            st.download_button("Unduh CSV Data Bersih", cleaned_csv, file_name="cleaned_data.csv", mime="text/csv")
+            st.download_button("Unduh CSV Tanpa Duplikasi", no_duplicates_csv, file_name="no_duplicates_data.csv", mime="text/csv")
 
     except KeyError as e:
         st.error(f"Kesalahan dalam memproses data: {e}")
