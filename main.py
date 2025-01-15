@@ -3,6 +3,7 @@ import streamlit as st
 import pdfplumber
 import pandas as pd
 import csv
+import io
 
 # Fungsi untuk ekstraksi tabel dari PDF dan menyimpan ke CSV
 def extract_data_from_pdf(pdf_path, extracted_csv_path):
@@ -45,10 +46,10 @@ def clean_csv(input_file):
 # Fungsi untuk mengecek dan menyisakan satu data dari duplikasi berdasarkan kolom pertama dan ketujuh
 def check_and_remove_duplicates(df):
     # Mengecek duplikasi berdasarkan kolom 1 (index 0) dan kolom 7 (index 6)
-    duplicates = df[df.duplicated(subset=[1, 7], keep=False)]
+    duplicates = df[df.duplicated(subset=[0, 6], keep=False)]
     if not duplicates.empty:
         # Hapus duplikasi dan sisakan satu
-        df_no_duplicates = df.drop_duplicates(subset=[1, 7], keep='first')
+        df_no_duplicates = df.drop_duplicates(subset=[0, 6], keep='first')
         return df_no_duplicates, duplicates
     return df, pd.DataFrame()  # Jika tidak ada duplikasi, kembalikan DataFrame asli
 
@@ -110,31 +111,12 @@ if pdf_file is not None:
         
         with tab3:
             st.subheader("Opsi Unduhan 📂")
-        
-            # Baca kembali file cleaned_data.csv
-            with open(cleaned_csv_path, 'r', encoding='utf-8') as f:
-                cleaned_csv_content = f.read()
-        
-            # Baca kembali file no_duplicates_data.csv
-            with open(no_duplicates_csv_path, 'r', encoding='utf-8') as f:
-                no_duplicates_csv_content = f.read()
-        
-            # Buat objek BytesIO untuk file CSV
-            cleaned_csv_buffer = io.BytesIO(cleaned_csv_content.encode('utf-8'))
-            no_duplicates_csv_buffer = io.BytesIO(no_duplicates_csv_content.encode('utf-8'))
-        
-            # Tombol unduh
-            st.download_button(
-                "Unduh CSV Data Bersih",
-                data=cleaned_csv_buffer,
-                file_name="cleaned_data.csv",
-                mime="text/csv"
-            )
-            st.download_button(
-                "Unduh CSV Tanpa Duplikasi",
-                data=no_duplicates_csv_buffer,
-                file_name="no_duplicates_data.csv",
-                mime="text/csv"
-            )
+            # Menyimpan data tanpa duplikasi ke CSV
+            no_duplicates_csv_path = os.path.join(temp_dir, "no_duplicates_data.csv")
+            df_no_duplicates.to_csv(no_duplicates_csv_path, index=False, header=False)
+            
+            st.download_button("Unduh CSV Data Bersih", cleaned_csv_path, file_name="cleaned_data.csv")
+            st.download_button("Unduh CSV Tanpa Duplikasi", no_duplicates_csv_path, file_name="no_duplicates_data.csv")
+
     except KeyError as e:
         st.error(f"Kesalahan dalam memproses data: {e}")
