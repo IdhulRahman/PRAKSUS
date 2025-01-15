@@ -110,12 +110,31 @@ if pdf_file is not None:
         
         with tab3:
             st.subheader("Opsi Unduhan 📂")
-            # Menyimpan data tanpa duplikasi ke CSV
-            no_duplicates_csv_path = os.path.join(temp_dir, "no_duplicates_data.csv")
-            df_no_duplicates.to_csv(no_duplicates_csv_path, index=False, header=False)
-            
-            st.download_button("Unduh CSV Data Bersih", cleaned_csv_path, file_name="cleaned_data.csv")
-            st.download_button("Unduh CSV Tanpa Duplikasi", no_duplicates_csv_path, file_name="no_duplicates_data.csv")
-
+        
+            # Baca kembali file cleaned_data.csv
+            with open(cleaned_csv_path, 'r', encoding='utf-8') as f:
+                cleaned_csv_content = f.read()
+        
+            # Baca kembali file no_duplicates_data.csv
+            with open(no_duplicates_csv_path, 'r', encoding='utf-8') as f:
+                no_duplicates_csv_content = f.read()
+        
+            # Buat objek BytesIO untuk file CSV
+            cleaned_csv_buffer = io.BytesIO(cleaned_csv_content.encode('utf-8'))
+            no_duplicates_csv_buffer = io.BytesIO(no_duplicates_csv_content.encode('utf-8'))
+        
+            # Tombol unduh
+            st.download_button(
+                "Unduh CSV Data Bersih",
+                data=cleaned_csv_buffer,
+                file_name="cleaned_data.csv",
+                mime="text/csv"
+            )
+            st.download_button(
+                "Unduh CSV Tanpa Duplikasi",
+                data=no_duplicates_csv_buffer,
+                file_name="no_duplicates_data.csv",
+                mime="text/csv"
+            )
     except KeyError as e:
         st.error(f"Kesalahan dalam memproses data: {e}")
