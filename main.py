@@ -46,10 +46,10 @@ def clean_csv(input_file):
 # Fungsi untuk mengecek dan menyisakan satu data dari duplikasi berdasarkan kolom pertama dan ketujuh
 def check_and_remove_duplicates(df):
     # Mengecek duplikasi berdasarkan kolom 1 (index 0) dan kolom 7 (index 6)
-    duplicates = df[df.duplicated(subset=[0, 6], keep=False)]
+    duplicates = df[df.duplicated(subset=[1, 7], keep=False)]
     if not duplicates.empty:
         # Hapus duplikasi dan sisakan satu
-        df_no_duplicates = df.drop_duplicates(subset=[0, 6], keep='first')
+        df_no_duplicates = df.drop_duplicates(subset=[1, 7], keep='first')
         return df_no_duplicates, duplicates
     return df, pd.DataFrame()  # Jika tidak ada duplikasi, kembalikan DataFrame asli
 
